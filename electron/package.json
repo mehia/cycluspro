@@ -1,0 +1,49 @@
+{
+  "name": "cyclus",
+  "productName": "cyclus",
+  "version": "1.0.0",
+  "description": "Rastreador diario de habitos",
+  "main": "main.js",
+  "author": "cyclus",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --x64"
+  },
+  "devDependencies": {
+    "electron": "^32.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.cyclus.app",
+    "productName": "cyclus",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "app/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "app/icons/myhabits.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "cyclus"
+    }
+  },
+  "allowScripts": {
+    "electron@32.3.3": true
+  }
+}

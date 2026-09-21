@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>myhabits</title>
+<meta name="description" content="Rastreador diário de hábitos, mês a mês.">
+<meta name="theme-color" content="#6c3ce0">
+<meta name="color-scheme" content="dark light">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="myhabits">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Sora:wght@400;600;700&display=swap">
+<style>
+  :root{
+    --bg-0:#0c0616;
+    --bg-1:#180a2e;
+    --bg-2:#241040;
+    --panel:#1c0e34;
+    --panel-2:#150a28;
+    --line:#3a2160;
+    --ink:#f1ecfb;
+    --ink-dim:#b3a3d6;
+    --ink-faint:#7a6aa0;
+    --accent:#a970ff;
+    --accent-2:#6c3ce0;
+    --done:#4fd67a;
+    --done-ink:#06210f;
+    --miss:#ff5d6c;
+    --miss-ink:#2a0508;
+    --empty:#2a1850;
+  }
+  *{box-sizing:border-box;}
+  html{min-height:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 700px at 15% -10%, #3a1a6b55, transparent 60%),
+      radial-gradient(900px 600px at 100% 0%, #23124a99, transparent 55%),
+      linear-gradient(180deg, var(--bg-0), var(--bg-1) 40%, var(--bg-2));
+    background-attachment:fixed;
+    color:var(--ink);
+    font-family:'Sora', system-ui, sans-serif;
+    padding:calc(32px + env(safe-area-inset-top,0px)) calc(20px + env(safe-area-inset-right,0px)) calc(60px + env(safe-area-inset-bottom,0px)) calc(20px + env(safe-area-inset-left,0px));
+    min-height:100%;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .wrap{max-width:1180px;margin:0 auto;}
+
+  header.top{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:28px;
+  }
+  .capi{
+    width:56px;height:56px;flex:none;
+    border-radius:16px;
+    background:linear-gradient(155deg, var(--accent-2), #35156b);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 24px -8px #6c3ce090, inset 0 0 0 1px #ffffff22;
+  }
+  .capi svg{width:34px;height:34px;stroke:#f1ecfb;}
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(26px,4vw,38px);
+    letter-spacing:0.3px;
+    margin:0;
+    line-height:1.05;
+  }
+  h1 em{font-style:normal;color:var(--accent);}
+  .sub{color:var(--ink-dim);font-size:14px;margin-top:4px;}
+
+  .toprow{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  select, button.ghost{
+    background:var(--panel);
+    border:1px solid var(--line);
+    color:var(--ink);
+    border-radius:10px;
+    padding:9px 14px;
+    font-family:inherit;
+    font-size:13px;
+    cursor:pointer;
+  }
+  button.ghost:hover{border-color:var(--accent);}
+  button.ghost:focus-visible, select:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  button.install{
+    background:linear-gradient(150deg, var(--accent), var(--accent-2));
+    border:none;color:#fff;font-weight:700;
+    box-shadow:0 8px 20px -8px #8b5cf6a0;
+  }
+  button.install:hover{filter:brightness(1.08);}
+
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(150px,1fr));
+    gap:12px;
+    margin-bottom:26px;
+  }
+  .stat{
+    background:linear-gradient(160deg, var(--panel), var(--panel-2));
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px 18px;
+  }
+  .stat .num{
+    font-family:'Fraunces', serif;
+    font-size:28px;
+    font-variant-numeric:tabular-nums;
+    color:var(--accent);
+    line-height:1;
+  }
+  .stat .lbl{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--ink-faint);
+    margin-top:6px;
+  }
+  .stat.hero{background:linear-gradient(155deg, var(--accent-2), #4a1f96); border-color:#8b5cf680;}
+  .stat.hero .num{color:#fff;}
+  .stat.hero .lbl{color:#e4d9ffcc;}
+
+  table.board{
+    width:100%;
+    border-collapse:collapse;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 20px 50px -25px #000000aa;
+  }
+  thead th{
+    background:linear-gradient(180deg,#20103d,#170b2c);
+    color:var(--ink);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.07em;
+    padding:10px 4px;
+    text-align:center;
+    font-weight:600;
+    border-bottom:1px solid var(--line);
+    position:sticky;
+    top:0;
+  }
+  thead th:first-child{text-align:left;padding-left:18px;min-width:170px;}
+  tbody tr:not(:last-child) td, tbody tr:not(:last-child) th{border-bottom:1px solid #2a184a;}
+  tbody tr:hover{background:#ffffff06;}
+  th.habitname{
+    text-align:left;
+    padding:14px 10px 14px 18px;
+    vertical-align:middle;
+  }
+  .habit-name-input{
+    background:transparent;
+    border:none;
+    color:var(--ink);
+    font-family:inherit;
+    font-weight:600;
+    font-size:13.5px;
+    width:100%;
+    padding:4px 2px;
+    border-radius:6px;
+  }
+  .habit-name-input:hover, .habit-name-input:focus{background:#ffffff0c;}
+  .habit-name-input:focus-visible{outline:1px solid var(--accent);}
+  .rowmeta{font-size:10.5px;color:var(--ink-faint);margin-top:2px;font-variant-numeric:tabular-nums;}
+
+  td.cell{padding:3px;text-align:center;}
+  .dot{
+    width:22px;height:22px;
+    margin:0 auto;
+    border-radius:50%;
+    border:1.5px solid #4a3480;
+    background:var(--empty);
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font-size:9.5px;
+    font-weight:700;
+    color:#8f7dbd;
+    font-variant-numeric:tabular-nums;
+    transition:transform .12s ease, background .12s ease, border-color .12s ease;
+    user-select:none;
+  }
+  .dot:hover{transform:scale(1.12); border-color:var(--accent);}
+  .dot:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .dot.done{background:var(--done); border-color:var(--done); color:var(--done-ink);}
+  .dot.miss{background:var(--miss); border-color:var(--miss); color:var(--miss-ink);}
+
+  th.daynum{color:var(--ink-faint); font-weight:600;}
+  th.daynum.today{color:#fff; background:linear-gradient(180deg,#3a2070,#2a1550);}
+
+  .del-col{width:34px;text-align:center;}
+  .del-btn{
+    background:none;border:none;color:var(--ink-faint);
+    cursor:pointer;font-size:15px;line-height:1;padding:4px;border-radius:6px;
+  }
+  .del-btn:hover{color:var(--miss); background:#ffffff0c;}
+
+  .addrow{
+    display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;
+  }
+  .addrow input[type=text]{
+    flex:1;min-width:200px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    color:var(--ink);
+    border-radius:10px;
+    padding:10px 14px;
+    font-family:inherit;
+    font-size:13.5px;
+  }
+  .addrow input[type=text]:focus-visible{outline:2px solid var(--accent);}
+  .addrow button{
+    background:linear-gradient(150deg, var(--accent), var(--accent-2));
+    border:none;color:#fff;font-weight:700;font-size:13px;
+    border-radius:10px;padding:10px 20px;cursor:pointer;
+    box-shadow:0 8px 20px -8px #8b5cf6a0;
+  }
+  .addrow button:hover{filter:brightness(1.08);}
+
+  .legend{
+    display:flex;gap:22px;flex-wrap:wrap;
+    margin-top:20px;
+    font-size:12.5px;color:var(--ink-dim);
+  }
+  .legend span{display:inline-flex;align-items:center;gap:8px;}
+  .swatch{width:14px;height:14px;border-radius:50%;display:inline-block;}
+  .swatch.done{background:var(--done);}
+  .swatch.miss{background:var(--miss);}
+  .swatch.empty{background:var(--empty); border:1.5px solid #4a3480;}
+
+  .tablewrap{overflow-x:auto; border-radius:16px; -webkit-overflow-scrolling:touch;}
+
+  footer.rules{
+    margin-top:26px;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px 20px;
+    font-size:13px;
+    color:var(--ink-dim);
+  }
+  footer.rules b{color:var(--ink);}
+  footer.rules ul{margin:8px 0 0; padding-left:18px;}
+  footer.rules li{margin-bottom:4px;}
+
+  @media (max-width:640px){
+    body{padding-top:calc(20px + env(safe-area-inset-top,0px));}
+    .toprow{margin-left:0;width:100%;}
+    .toprow select{flex:1;}
+  }
+
+  .authOverlay{
+    position:fixed; inset:0; z-index:50;
+    background:linear-gradient(180deg, var(--bg-0), var(--bg-1) 40%, var(--bg-2));
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+  }
+  .authBox{
+    width:100%; max-width:360px;
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:16px; padding:28px 24px;
+    box-shadow:0 20px 50px -25px #000000aa;
+  }
+  .authBox h2{font-family:'Fraunces',serif; margin:0 0 6px; font-size:22px;}
+  .authBox p{color:var(--ink-dim); font-size:13px; margin:0 0 18px;}
+  .authBox input{
+    width:100%; background:var(--panel-2); border:1px solid var(--line);
+    color:var(--ink); border-radius:10px; padding:10px 12px;
+    font-family:inherit; font-size:13.5px; margin-bottom:10px;
+  }
+  .authBox input:focus-visible{outline:2px solid var(--accent);}
+  .authBox button.primary{
+    width:100%; background:linear-gradient(150deg, var(--accent), var(--accent-2));
+    border:none; color:#fff; font-weight:700; font-size:13.5px;
+    border-radius:10px; padding:11px; cursor:pointer; margin-top:4px;
+  }
+  .authBox button.primary:hover{filter:brightness(1.08);}
+  .authBox .switchMode{
+    background:none; border:none; color:var(--accent); cursor:pointer;
+    font-size:12.5px; margin-top:14px; text-decoration:underline; padding:0;
+  }
+  .authBox .authError{color:var(--miss); font-size:12.5px; margin-top:10px; min-height:1em;}
+  .accountBar{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-dim);}
+  .accountBar b{color:var(--ink); font-weight:600;}
+
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg-0:#f3eefc; --bg-1:#ece2fb; --bg-2:#e2d3f9;
+      --panel:#ffffff; --panel-2:#f7f2ff;
+      --line:#ddc9f7; --ink:#2c1852; --ink-dim:#6b5590; --ink-faint:#9683b8;
+      --accent:#7c3aed; --accent-2:#5b21b6;
+      --empty:#ece3fa;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg-0:#0c0616; --bg-1:#180a2e; --bg-2:#241040;
+    --panel:#1c0e34; --panel-2:#150a28; --line:#3a2160;
+    --ink:#f1ecfb; --ink-dim:#b3a3d6; --ink-faint:#7a6aa0;
+    --accent:#a970ff; --accent-2:#6c3ce0; --empty:#2a1850;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="capi">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 15c0-3 2-5 5-5h9c3 0 5 2 6 4-1 3-4 5-8 5H8c-4 0-6-1.5-6-4z"/>
+        <circle cx="18" cy="12" r=".6" fill="#f1ecfb" stroke="none"/>
+        <path d="M9 10c0-2 1-3 2-3s2 1 2 3"/>
+        <path d="M3 15v3M20 16v2"/>
+      </svg>
+    </div>
+    <div>
+      <h1>my<em>habits</em></h1>
+      <div class="sub">Marque todos os dias. Seja sincero consigo mesmo, tutti frutto(a).</div>
+    </div>
+    <div class="toprow">
+      <div class="accountBar" id="accountBar" hidden>
+        <span>Conta: <b id="accountEmail"></b></span>
+        <button class="ghost" id="logoutBtn">Sair</button>
+      </div>
+      <button class="ghost install" id="installBtn" hidden>Instalar aplicativo</button>
+      <select id="monthSelect"></select>
+      <button class="ghost" id="resetMonth">Limpar mês</button>
+    </div>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="tablewrap">
+    <table class="board" id="board"></table>
+  </div>
+
+  <div class="addrow">
+    <input type="text" id="newHabit" placeholder="Adicionar novo hábito (ex: Leitura 20min)" maxlength="40">
+    <button id="addHabitBtn">+ Adicionar hábito</button>
+  </div>
+
+  <div class="legend">
+    <span><i class="swatch done"></i> Hábito feito</span>
+    <span><i class="swatch miss"></i> Hábito não feito</span>
+    <span><i class="swatch empty"></i> Ainda não marcado</span>
+  </div>
+
+  <footer class="rules">
+    <b>Regras</b>
+    <ul>
+      <li>Todos os dias, preencha o rastreador.</li>
+      <li>Seja sincero consigo mesmo, tutti frutto(a).</li>
+      <li>Envie o print/foto no grupo.</li>
+    </ul>
+  </footer>
+</div>
+
+<div class="authOverlay" id="authOverlay">
+  <div class="authBox">
+    <h2 id="authTitle">Entrar</h2>
+    <p id="authSub">Entre com a mesma conta no celular e no computador para sincronizar seus hábitos.</p>
+    <input type="email" id="authEmail" placeholder="E-mail" autocomplete="email">
+    <input type="password" id="authPassword" placeholder="Senha (mín. 6 caracteres)" autocomplete="current-password">
+    <button class="primary" id="authSubmit">Entrar</button>
+    <button class="switchMode" id="authSwitch">Não tenho conta — criar uma</button>
+    <div class="authError" id="authError"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword,
+  createUserWithEmailAndPassword, signOut
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+var firebaseConfig = {
+  apiKey: "AIzaSyCXU56h0uDMP0p6ZUAKAB1GuE9mCZHsIiw",
+  authDomain: "cyclusz.firebaseapp.com",
+  projectId: "cyclusz",
+  storageBucket: "cyclusz.firebasestorage.app",
+  messagingSenderId: "257424601740",
+  appId: "1:257424601740:web:a3b3287c93466663e081a9"
+};
+var fbApp = initializeApp(firebaseConfig);
+var auth = getAuth(fbApp);
+var db = getFirestore(fbApp);
+try{ enableIndexedDbPersistence(db); }catch(e){}
+
+(function(){
+  var DEFAULT_HABITS = [
+    "Zero açúcar",
+    "Banho gelado",
+    "Dieta da roça",
+    "Stomach vacuum",
+    "Treino de força",
+    "1h de cardio ou lutas",
+    "Envio checklist grupo",
+    "Máximo 1h rede social/dia",
+    "Sem vícios",
+    "3L de água"
+  ];
+
+  var STORE_KEY = "capivara-habit-tracker-v1";
+
+  function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
+  function monthKey(y,m){ return y+"-"+String(m+1).padStart(2,"0"); }
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORE_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return null;
+  }
+
+  var uid = null;
+  var unsubSnapshot = null;
+  var saveTimer = null;
+  var applyingRemote = false;
+
+  function pushToFirestore(){
+    if(!uid || applyingRemote) return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){
+      setDoc(doc(db, "users", uid), state).catch(function(e){ console.error(e); });
+    }, 300);
+  }
+
+  function saveState(){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+    pushToFirestore();
+  }
+
+  var now = new Date();
+  var state = loadState();
+  if(!state){
+    state = {
+      habits: DEFAULT_HABITS.map(function(name, i){ return {id: "h"+i+"-"+Date.now(), name: name}; }),
+      marks: {},
+      currentMonth: monthKey(now.getFullYear(), now.getMonth())
+    };
+  }
+  if(!state.currentMonth) state.currentMonth = monthKey(now.getFullYear(), now.getMonth());
+
+  function ensureMonthOptions(){
+    var sel = document.getElementById("monthSelect");
+    sel.innerHTML = "";
+    var opts = [];
+    var base = new Date();
+    for(var i=-6;i<=6;i++){
+      var d = new Date(base.getFullYear(), base.getMonth()+i, 1);
+      opts.push(monthKey(d.getFullYear(), d.getMonth()));
+    }
+    if(opts.indexOf(state.currentMonth) === -1) opts.push(state.currentMonth);
+    opts = opts.filter(function(v,i,a){return a.indexOf(v)===i;}).sort();
+    var names = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+    opts.forEach(function(k){
+      var parts = k.split("-");
+      var y = parseInt(parts[0],10), m = parseInt(parts[1],10)-1;
+      var label = names[m] + " " + parts[0];
+      void y;
+      var o = document.createElement("option");
+      o.value = k; o.textContent = label;
+      if(k === state.currentMonth) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.onchange = function(){ state.currentMonth = sel.value; saveState(); render(); };
+  }
+
+  function getMark(habitId, day){
+    var mk = state.currentMonth;
+    return (state.marks[mk] && state.marks[mk][habitId] && state.marks[mk][habitId][day]) || "";
+  }
+  function setMark(habitId, day, val){
+    var mk = state.currentMonth;
+    if(!state.marks[mk]) state.marks[mk] = {};
+    if(!state.marks[mk][habitId]) state.marks[mk][habitId] = {};
+    if(val === "") delete state.marks[mk][habitId][day];
+    else state.marks[mk][habitId][day] = val;
+    saveState();
+  }
+
+  function cycle(v){
+    if(v === "") return "done";
+    if(v === "done") return "miss";
+    return "";
+  }
+
+  /* Recalcula contadores e cartões sem redesenhar a grade inteira,
+     para que o progresso mude no instante em que você marca um dia. */
+  function paintTotals(nd){
+    var totalDone = 0, totalMiss = 0;
+    state.habits.forEach(function(h){
+      var c = 0;
+      for(var d=1; d<=nd; d++){
+        var v = getMark(h.id, d);
+        if(v === "done") c++;
+        else if(v === "miss") totalMiss++;
+      }
+      totalDone += c;
+      var meta = document.querySelector('.rowmeta[data-hid="'+h.id+'"]');
+      if(meta) meta.textContent = c+"/"+nd+" dias";
+    });
+
+    var possible = state.habits.length * nd;
+    var pct = possible ? Math.round((totalDone/possible)*100) : 0;
+    document.getElementById("stats").innerHTML =
+      '<div class="stat hero"><div class="num">'+pct+'%</div><div class="lbl">Progresso do mês</div></div>'+
+      '<div class="stat"><div class="num">'+totalDone+'</div><div class="lbl">Hábitos feitos</div></div>'+
+      '<div class="stat"><div class="num">'+totalMiss+'</div><div class="lbl">Hábitos não feitos</div></div>'+
+      '<div class="stat"><div class="num">'+state.habits.length+'</div><div class="lbl">Hábitos ativos</div></div>';
+  }
+
+  function render(){
+    ensureMonthOptions();
+    var parts = state.currentMonth.split("-");
+    var y = parseInt(parts[0],10), m = parseInt(parts[1],10)-1;
+    var nd = daysInMonth(y,m);
+    var todayStr = monthKey(now.getFullYear(), now.getMonth());
+    var todayDay = now.getDate();
+
+    var table = document.getElementById("board");
+    var html = "<thead><tr><th>Hábito</th>";
+    for(var d=1; d<=nd; d++){
+      var isToday = (state.currentMonth === todayStr && d === todayDay);
+      html += '<th class="daynum'+(isToday?' today':'')+'">'+d+'</th>';
+    }
+    html += '<th class="del-col"></th></tr></thead><tbody>';
+
+    state.habits.forEach(function(h){
+      html += '<tr>';
+      html += '<th class="habitname"><input class="habit-name-input" data-hid="'+h.id+'" value="'+h.name.replace(/"/g,'&quot;')+'"><div class="rowmeta" data-hid="'+h.id+'"></div></th>';
+      for(var d2=1; d2<=nd; d2++){
+        var v = getMark(h.id, d2);
+        html += '<td class="cell"><div class="dot '+v+'" role="button" tabindex="0" aria-label="Dia '+d2+', '+h.name+'" data-hid="'+h.id+'" data-day="'+d2+'">'+d2+'</div></td>';
+      }
+      html += '<td class="del-col"><button class="del-btn" data-hid="'+h.id+'" title="Remover hábito">&times;</button></td>';
+      html += '</tr>';
+    });
+    html += '</tbody>';
+    table.innerHTML = html;
+
+    paintTotals(nd);
+
+    table.querySelectorAll(".dot").forEach(function(el){
+      function toggle(){
+        var hid = el.getAttribute("data-hid"), day = el.getAttribute("data-day");
+        var nv = cycle(getMark(hid, day));
+        setMark(hid, day, nv);
+        el.className = "dot " + nv;
+        paintTotals(nd);
+      }
+      el.addEventListener("click", toggle);
+      el.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggle(); } });
+    });
+    table.querySelectorAll(".habit-name-input").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var hid = inp.getAttribute("data-hid");
+        var h = state.habits.find(function(x){return x.id===hid;});
+        if(h){ h.name = inp.value.trim() || h.name; saveState(); render(); }
+      });
+    });
+    table.querySelectorAll(".del-btn").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var hid = btn.getAttribute("data-hid");
+        state.habits = state.habits.filter(function(x){return x.id!==hid;});
+        saveState(); render();
+      });
+    });
+  }
+
+  document.getElementById("addHabitBtn").addEventListener("click", function(){
+    var inp = document.getElementById("newHabit");
+    var name = inp.value.trim();
+    if(!name) return;
+    state.habits.push({id:"h"+Date.now(), name:name});
+    inp.value = "";
+    saveState(); render();
+  });
+  document.getElementById("newHabit").addEventListener("keydown", function(e){
+    if(e.key === "Enter"){ document.getElementById("addHabitBtn").click(); }
+  });
+  document.getElementById("resetMonth").addEventListener("click", function(){
+    delete state.marks[state.currentMonth];
+    saveState(); render();
+  });
+
+  /* ---- Autenticação e sincronização (Firebase) ---- */
+
+  var authOverlay = document.getElementById("authOverlay");
+  var accountBar = document.getElementById("accountBar");
+  var accountEmail = document.getElementById("accountEmail");
+  var authEmail = document.getElementById("authEmail");
+  var authPassword = document.getElementById("authPassword");
+  var authError = document.getElementById("authError");
+  var authSubmit = document.getElementById("authSubmit");
+  var authSwitch = document.getElementById("authSwitch");
+  var authTitle = document.getElementById("authTitle");
+  var isSignup = false;
+
+  authSwitch.addEventListener("click", function(){
+    isSignup = !isSignup;
+    authTitle.textContent = isSignup ? "Criar conta" : "Entrar";
+    authSubmit.textContent = isSignup ? "Criar conta" : "Entrar";
+    authSwitch.textContent = isSignup ? "Já tenho conta — entrar" : "Não tenho conta — criar uma";
+    authError.textContent = "";
+  });
+
+  function authErrorMessage(code){
+    var map = {
+      "auth/invalid-email": "E-mail inválido.",
+      "auth/user-not-found": "Conta não encontrada. Crie uma conta primeiro.",
+      "auth/wrong-password": "Senha incorreta.",
+      "auth/invalid-credential": "E-mail ou senha incorretos.",
+      "auth/email-already-in-use": "Já existe uma conta com esse e-mail. Tente entrar.",
+      "auth/weak-password": "A senha precisa ter pelo menos 6 caracteres."
+    };
+    return map[code] || "Não foi possível continuar. Tente de novo.";
+  }
+
+  authSubmit.addEventListener("click", function(){
+    var email = authEmail.value.trim();
+    var pass = authPassword.value;
+    if(!email || !pass){ authError.textContent = "Preencha e-mail e senha."; return; }
+    authError.textContent = "";
+    authSubmit.disabled = true;
+    var action = isSignup ? createUserWithEmailAndPassword(auth, email, pass) : signInWithEmailAndPassword(auth, email, pass);
+    action.catch(function(err){
+      authError.textContent = authErrorMessage(err.code);
+    }).finally(function(){
+      authSubmit.disabled = false;
+    });
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", function(){
+    signOut(auth);
+  });
+
+  onAuthStateChanged(auth, function(user){
+    if(unsubSnapshot){ unsubSnapshot(); unsubSnapshot = null; }
+
+    if(!user){
+      uid = null;
+      authOverlay.hidden = false;
+      accountBar.hidden = true;
+      authEmail.value = "";
+      authPassword.value = "";
+      return;
+    }
+
+    uid = user.uid;
+    authOverlay.hidden = true;
+    accountBar.hidden = false;
+    accountEmail.textContent = user.email;
+
+    unsubSnapshot = onSnapshot(doc(db, "users", uid), function(snap){
+      if(snap.exists()){
+        applyingRemote = true;
+        state = snap.data();
+        if(!state.currentMonth) state.currentMonth = monthKey(now.getFullYear(), now.getMonth());
+        if(!state.habits) state.habits = [];
+        if(!state.marks) state.marks = {};
+        try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+        render();
+        applyingRemote = false;
+      } else {
+        setDoc(doc(db, "users", uid), state).catch(function(e){ console.error(e); });
+        render();
+      }
+    }, function(err){
+      console.error(err);
+      render();
+    });
+  });
+
+  /* ---- Camada de aplicativo (PWA) ---- */
+
+  var deferredPrompt = null;
+  var installBtn = document.getElementById("installBtn");
+
+  window.addEventListener("beforeinstallprompt", function(e){
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.hidden = false;
+  });
+
+  installBtn.addEventListener("click", function(){
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(){
+      deferredPrompt = null;
+      installBtn.hidden = true;
+    });
+  });
+
+  window.addEventListener("appinstalled", function(){
+    deferredPrompt = null;
+    installBtn.hidden = true;
+  });
+
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("sw.js").catch(function(){});
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
