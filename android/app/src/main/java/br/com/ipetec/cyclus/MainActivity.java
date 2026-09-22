@@ -1,4 +1,4 @@
-package br.com.ipetec.myhabits;
+package br.com.ipetec.cyclus;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">cyclus</string>
     <string name="title_activity_main">cyclus</string>
-    <string name="package_name">br.com.ipetec.myhabits</string>
-    <string name="custom_url_scheme">br.com.ipetec.myhabits</string>
+    <string name="package_name">br.com.ipetec.cyclus</string>
+    <string name="custom_url_scheme">br.com.ipetec.cyclus</string>
 </resources>
