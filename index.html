@@ -259,39 +259,50 @@
     .toprow select{flex:1;}
   }
 
-  .authOverlay{
+  .syncPanel{
     position:fixed; inset:0; z-index:50;
-    background:linear-gradient(180deg, var(--bg-0), var(--bg-1) 40%, var(--bg-2));
+    background:#0c0616cc;
     display:flex; align-items:center; justify-content:center;
     padding:20px;
   }
-  .authBox{
-    width:100%; max-width:360px;
+  .syncBox{
+    width:100%; max-width:380px;
     background:var(--panel); border:1px solid var(--line);
     border-radius:16px; padding:28px 24px;
     box-shadow:0 20px 50px -25px #000000aa;
   }
-  .authBox h2{font-family:'Fraunces',serif; margin:0 0 6px; font-size:22px;}
-  .authBox p{color:var(--ink-dim); font-size:13px; margin:0 0 18px;}
-  .authBox input{
+  .syncBox h2{font-family:'Fraunces',serif; margin:0 0 6px; font-size:22px;}
+  .syncBox p{color:var(--ink-dim); font-size:13px; margin:0 0 14px; line-height:1.5;}
+  .syncBox .codeShow{
+    font-family:'Sora',monospace; font-size:26px; font-weight:700; letter-spacing:3px;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:10px;
+    padding:14px; text-align:center; color:var(--accent); margin-bottom:14px;
+    user-select:all;
+  }
+  .syncBox input{
     width:100%; background:var(--panel-2); border:1px solid var(--line);
     color:var(--ink); border-radius:10px; padding:10px 12px;
     font-family:inherit; font-size:13.5px; margin-bottom:10px;
+    text-transform:uppercase; letter-spacing:2px; text-align:center;
   }
-  .authBox input:focus-visible{outline:2px solid var(--accent);}
-  .authBox button.primary{
+  .syncBox input:focus-visible{outline:2px solid var(--accent);}
+  .syncBox button.primary{
     width:100%; background:linear-gradient(150deg, var(--accent), var(--accent-2));
     border:none; color:#fff; font-weight:700; font-size:13.5px;
     border-radius:10px; padding:11px; cursor:pointer; margin-top:4px;
   }
-  .authBox button.primary:hover{filter:brightness(1.08);}
-  .authBox .switchMode{
+  .syncBox button.primary:hover{filter:brightness(1.08);}
+  .syncBox .switchMode{
     background:none; border:none; color:var(--accent); cursor:pointer;
     font-size:12.5px; margin-top:14px; text-decoration:underline; padding:0;
   }
-  .authBox .authError{color:var(--miss); font-size:12.5px; margin-top:10px; min-height:1em;}
+  .syncBox .syncClose{
+    background:none; border:none; color:var(--ink-faint); cursor:pointer;
+    font-size:12.5px; margin-top:10px; padding:0;
+  }
+  .syncBox .syncError{color:var(--miss); font-size:12.5px; margin-top:10px; min-height:1em;}
   .accountBar{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-dim);}
-  .accountBar b{color:var(--ink); font-weight:600;}
+  .accountBar b{color:var(--ink); font-weight:600; font-family:monospace; letter-spacing:1px;}
 
   @media (prefers-color-scheme: light){
     :root:not([data-theme="dark"]){
@@ -328,8 +339,8 @@
     </div>
     <div class="toprow">
       <div class="accountBar" id="accountBar" hidden>
-        <span>Conta: <b id="accountEmail"></b></span>
-        <button class="ghost" id="logoutBtn">Sair</button>
+        <span>Código: <b id="accountEmail"></b></span>
+        <button class="ghost" id="logoutBtn">Sincronizar</button>
       </div>
       <button class="ghost install" id="installBtn" hidden>Instalar aplicativo</button>
       <select id="monthSelect"></select>
@@ -364,23 +375,24 @@
   </footer>
 </div>
 
-<div class="authOverlay" id="authOverlay">
-  <div class="authBox">
-    <h2 id="authTitle">Entrar</h2>
-    <p id="authSub">Entre com a mesma conta no celular e no computador para sincronizar seus hábitos.</p>
-    <input type="email" id="authEmail" placeholder="E-mail" autocomplete="email">
-    <input type="password" id="authPassword" placeholder="Senha (mín. 6 caracteres)" autocomplete="current-password">
-    <button class="primary" id="authSubmit">Entrar</button>
-    <button class="switchMode" id="authSwitch">Não tenho conta — criar uma</button>
-    <div class="authError" id="authError"></div>
+<div class="syncPanel" id="syncPanel" hidden>
+  <div class="syncBox">
+    <h2>Sincronizar</h2>
+    <p>Este é o código deste aparelho. Para sincronizar com outro celular/PC,
+    digite o mesmo código lá — ou cole aqui o código do outro aparelho para
+    juntar os dois.</p>
+    <div class="codeShow" id="codeShow"></div>
+    <input type="text" id="joinCode" placeholder="Colar código de outro aparelho" maxlength="8">
+    <button class="primary" id="joinBtn">Sincronizar com esse código</button>
+    <div class="syncError" id="syncError"></div>
+    <button class="syncClose" id="syncClose">Fechar</button>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
-  getAuth, onAuthStateChanged, signInWithEmailAndPassword,
-  createUserWithEmailAndPassword, signOut
+  getAuth, onAuthStateChanged, signInAnonymously
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence
@@ -414,6 +426,7 @@ try{ enableIndexedDbPersistence(db); }catch(e){}
   ];
 
   var STORE_KEY = "capivara-habit-tracker-v1";
+  var CODE_KEY = "myhabits-sync-code";
 
   function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
   function monthKey(y,m){ return y+"-"+String(m+1).padStart(2,"0"); }
@@ -426,16 +439,34 @@ try{ enableIndexedDbPersistence(db); }catch(e){}
     return null;
   }
 
-  var uid = null;
+  function randomCode(){
+    var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    var out = "";
+    for(var i=0;i<6;i++) out += chars[Math.floor(Math.random()*chars.length)];
+    return out;
+  }
+
+  function loadSyncCode(){
+    try{
+      var c = localStorage.getItem(CODE_KEY);
+      if(c) return c;
+    }catch(e){}
+    var nc = randomCode();
+    try{ localStorage.setItem(CODE_KEY, nc); }catch(e){}
+    return nc;
+  }
+
+  var syncCode = loadSyncCode();
+  var authed = false;
   var unsubSnapshot = null;
   var saveTimer = null;
   var applyingRemote = false;
 
   function pushToFirestore(){
-    if(!uid || applyingRemote) return;
+    if(!authed || applyingRemote) return;
     clearTimeout(saveTimer);
     saveTimer = setTimeout(function(){
-      setDoc(doc(db, "users", uid), state).catch(function(e){ console.error(e); });
+      setDoc(doc(db, "synccodes", syncCode), state).catch(function(e){ console.error(e); });
     }, 300);
   }
 
@@ -598,75 +629,39 @@ try{ enableIndexedDbPersistence(db); }catch(e){}
     saveState(); render();
   });
 
-  /* ---- Autenticação e sincronização (Firebase) ---- */
+  /* ---- Sincronização por código (Firebase, sem tela de login) ---- */
 
-  var authOverlay = document.getElementById("authOverlay");
+  var syncPanel = document.getElementById("syncPanel");
   var accountBar = document.getElementById("accountBar");
   var accountEmail = document.getElementById("accountEmail");
-  var authEmail = document.getElementById("authEmail");
-  var authPassword = document.getElementById("authPassword");
-  var authError = document.getElementById("authError");
-  var authSubmit = document.getElementById("authSubmit");
-  var authSwitch = document.getElementById("authSwitch");
-  var authTitle = document.getElementById("authTitle");
-  var isSignup = false;
+  var codeShow = document.getElementById("codeShow");
+  var joinCode = document.getElementById("joinCode");
+  var joinBtn = document.getElementById("joinBtn");
+  var syncError = document.getElementById("syncError");
 
-  authSwitch.addEventListener("click", function(){
-    isSignup = !isSignup;
-    authTitle.textContent = isSignup ? "Criar conta" : "Entrar";
-    authSubmit.textContent = isSignup ? "Criar conta" : "Entrar";
-    authSwitch.textContent = isSignup ? "Já tenho conta — entrar" : "Não tenho conta — criar uma";
-    authError.textContent = "";
-  });
-
-  function authErrorMessage(code){
-    var map = {
-      "auth/invalid-email": "E-mail inválido.",
-      "auth/user-not-found": "Conta não encontrada. Crie uma conta primeiro.",
-      "auth/wrong-password": "Senha incorreta.",
-      "auth/invalid-credential": "E-mail ou senha incorretos.",
-      "auth/email-already-in-use": "Já existe uma conta com esse e-mail. Tente entrar.",
-      "auth/weak-password": "A senha precisa ter pelo menos 6 caracteres."
-    };
-    return map[code] || "Não foi possível continuar. Tente de novo.";
+  function openSyncPanel(){
+    codeShow.textContent = syncCode;
+    joinCode.value = "";
+    syncError.textContent = "";
+    syncPanel.hidden = false;
   }
 
-  authSubmit.addEventListener("click", function(){
-    var email = authEmail.value.trim();
-    var pass = authPassword.value;
-    if(!email || !pass){ authError.textContent = "Preencha e-mail e senha."; return; }
-    authError.textContent = "";
-    authSubmit.disabled = true;
-    var action = isSignup ? createUserWithEmailAndPassword(auth, email, pass) : signInWithEmailAndPassword(auth, email, pass);
-    action.catch(function(err){
-      authError.textContent = authErrorMessage(err.code);
-    }).finally(function(){
-      authSubmit.disabled = false;
-    });
+  document.getElementById("logoutBtn").addEventListener("click", openSyncPanel);
+  document.getElementById("syncClose").addEventListener("click", function(){ syncPanel.hidden = true; });
+
+  joinBtn.addEventListener("click", function(){
+    var code = joinCode.value.trim().toUpperCase();
+    if(!code){ syncError.textContent = "Digite um código."; return; }
+    syncCode = code;
+    try{ localStorage.setItem(CODE_KEY, syncCode); }catch(e){}
+    accountEmail.textContent = syncCode;
+    subscribeToSync();
+    syncPanel.hidden = true;
   });
 
-  document.getElementById("logoutBtn").addEventListener("click", function(){
-    signOut(auth);
-  });
-
-  onAuthStateChanged(auth, function(user){
+  function subscribeToSync(){
     if(unsubSnapshot){ unsubSnapshot(); unsubSnapshot = null; }
-
-    if(!user){
-      uid = null;
-      authOverlay.hidden = false;
-      accountBar.hidden = true;
-      authEmail.value = "";
-      authPassword.value = "";
-      return;
-    }
-
-    uid = user.uid;
-    authOverlay.hidden = true;
-    accountBar.hidden = false;
-    accountEmail.textContent = user.email;
-
-    unsubSnapshot = onSnapshot(doc(db, "users", uid), function(snap){
+    unsubSnapshot = onSnapshot(doc(db, "synccodes", syncCode), function(snap){
       if(snap.exists()){
         applyingRemote = true;
         state = snap.data();
@@ -677,13 +672,26 @@ try{ enableIndexedDbPersistence(db); }catch(e){}
         render();
         applyingRemote = false;
       } else {
-        setDoc(doc(db, "users", uid), state).catch(function(e){ console.error(e); });
+        setDoc(doc(db, "synccodes", syncCode), state).catch(function(e){ console.error(e); });
         render();
       }
     }, function(err){
       console.error(err);
       render();
     });
+  }
+
+  onAuthStateChanged(auth, function(user){
+    if(!user){
+      authed = false;
+      accountBar.hidden = true;
+      signInAnonymously(auth).catch(function(e){ console.error(e); });
+      return;
+    }
+    authed = true;
+    accountBar.hidden = false;
+    accountEmail.textContent = syncCode;
+    subscribeToSync();
   });
 
   /* ---- Camada de aplicativo (PWA) ---- */
