@@ -3,7 +3,7 @@
    de modo que o aplicativo abra instantaneamente e funcione 100% offline.
    Os dados dos hábitos NÃO passam por aqui: ficam em localStorage, no aparelho. */
 
-const CACHE = 'myhabits-v2';
+const CACHE = 'myhabits-v3';
 
 const SHELL = [
   './',
