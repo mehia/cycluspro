@@ -93,3 +93,59 @@ Os três guardam dados em locais diferentes: são históricos separados, não se
 
 Peça o que quiser direto: "hospeda no GitHub Pages", "adiciona exportar backup",
 "muda o cálculo do progresso para os dias decorridos", "coloca sequência/streak".
+
+---
+
+## Atualização — 2026-09-22
+
+### O que mudou desde a versão acima
+
+Este documento (a parte de cima) ficou desatualizado: o app **já tem login e
+sincronização via Firebase** (Auth por e-mail/senha + Firestore), não é mais
+"só localStorage". Isso foi feito antes desta sessão, no commit inicial do
+repositório GitHub `mehia/cycluspro`.
+
+### Estado atual
+
+- **Repositório:** https://github.com/mehia/cycluspro (público)
+- **Hospedado via GitHub Pages em:** https://mehia.github.io/cycluspro/
+- **Projeto Firebase:** `cyclusz` (Auth + Firestore)
+- Domínio `mehia.github.io` já foi adicionado em Authorized domains no Firebase.
+- Objetivo do usuário: transformar o app em "app de celular" — decidido usar
+  o caminho PWA (instalar direto do navegador), não Capacitor/nativo por ora.
+
+### Bug encontrado e corrigido nesta sessão
+
+`sw.js` cacheava (cache-first) **qualquer** requisição GET, inclusive chamadas
+do SDK do Firebase para domínios do Google (`googleapis.com`,
+`firebaseapp.com`, `gstatic.com`). Isso fazia o app usar respostas antigas
+cacheadas mesmo depois de corrigir configurações no Firebase Console (ex:
+autorizar o domínio), resultando em: login parece completar (sem erro, botão
+volta ao normal) mas a tela de login nunca some.
+
+**Correção aplicada e já enviada ao GitHub** (commit `31a0c40`):
+chamadas para esses domínios agora pulam o cache do service worker
+(`if (isFirebase) return;`), e o nome do cache mudou de `myhabits-v1` para
+`myhabits-v2` para forçar a limpeza do cache antigo em quem já tinha
+instalado o app.
+
+### Pendente / não confirmado ainda
+
+- **Não confirmamos se o login funciona agora** após a correção. O usuário
+  ainda precisa: esperar o Pages atualizar (~1min), forçar reload
+  (Ctrl+Shift+R) ou desregistrar o service worker antigo em
+  DevTools → Application → Service Workers, e testar login/cadastro de novo.
+- Se ainda falhar: pedir o texto exato de qualquer erro no Console (F12), e
+  conferir se existe usuário duplicado/conflitante criado manualmente antes
+  em Firebase Console → Authentication → Users (aconteceu nesta sessão: um
+  e-mail foi cadastrado manualmente lá, o que pode conflitar com "criar
+  conta" pelo próprio app pedindo o mesmo e-mail — nesse caso apagar o
+  usuário manual e recriar pelo app, ou logar em vez de cadastrar).
+- Teste de instalação como PWA no celular (Android/iPhone) ainda não foi
+  confirmado pelo usuário — só a hospedagem foi validada.
+
+### Ao retomar (sessão atual)
+
+Peça: "confirma se o login/sync do Firebase já funciona" ou "testa a
+instalação como PWA no celular" — ou, se o usuário disser que ainda não
+funciona, peça o erro exato do Console (F12) antes de mexer em mais nada.
