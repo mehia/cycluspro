@@ -3,7 +3,7 @@
    de modo que o aplicativo abra instantaneamente e funcione 100% offline.
    Os dados dos hábitos NÃO passam por aqui: ficam em localStorage, no aparelho. */
 
-const CACHE = 'myhabits-v1';
+const CACHE = 'myhabits-v2';
 
 const SHELL = [
   './',
@@ -58,6 +58,13 @@ self.addEventListener('fetch', (event) => {
 
   // Fontes do Google: cache-first, com atualização em segundo plano.
   const isFont = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
+
+  // Chamadas do Firebase (auth, firestore, config) nunca passam por cache:
+  // precisam sempre da resposta mais recente do servidor.
+  const isFirebase = /(^|\.)googleapis\.com$/.test(url.hostname) ||
+    /(^|\.)firebaseapp\.com$/.test(url.hostname) ||
+    /(^|\.)gstatic\.com$/.test(url.hostname) && !isFont;
+  if (isFirebase) return;
 
   event.respondWith(
     caches.match(req).then((cached) => {
