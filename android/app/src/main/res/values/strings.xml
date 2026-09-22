@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">myhabits</string>
+    <string name="title_activity_main">myhabits</string>
+    <string name="package_name">br.com.ipetec.myhabits</string>
+    <string name="custom_url_scheme">br.com.ipetec.myhabits</string>
+</resources>

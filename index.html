@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>myhabits</title>
+<title>cyclus</title>
 <meta name="description" content="Rastreador diário de hábitos, mês a mês.">
-<meta name="theme-color" content="#6c3ce0">
+<meta name="theme-color" content="#ff8a2b">
 <meta name="color-scheme" content="dark light">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="myhabits">
+<meta name="apple-mobile-web-app-title" content="cyclus">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -19,30 +19,30 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Sora:wght@400;600;700&display=swap">
 <style>
   :root{
-    --bg-0:#0c0616;
-    --bg-1:#180a2e;
-    --bg-2:#241040;
-    --panel:#1c0e34;
-    --panel-2:#150a28;
-    --line:#3a2160;
-    --ink:#f1ecfb;
-    --ink-dim:#b3a3d6;
-    --ink-faint:#7a6aa0;
-    --accent:#a970ff;
-    --accent-2:#6c3ce0;
+    --bg-0:#050505;
+    --bg-1:#0e0e0e;
+    --bg-2:#161616;
+    --panel:#131313;
+    --panel-2:#0a0a0a;
+    --line:#332a20;
+    --ink:#f5efe8;
+    --ink-dim:#c9b8a4;
+    --ink-faint:#8a7a68;
+    --accent:#ff8a2b;
+    --accent-2:#e05e00;
     --done:#4fd67a;
     --done-ink:#06210f;
     --miss:#ff5d6c;
     --miss-ink:#2a0508;
-    --empty:#2a1850;
+    --empty:#1e1a15;
   }
   *{box-sizing:border-box;}
   html{min-height:100%;}
   body{
     margin:0;
     background:
-      radial-gradient(1200px 700px at 15% -10%, #3a1a6b55, transparent 60%),
-      radial-gradient(900px 600px at 100% 0%, #23124a99, transparent 55%),
+      radial-gradient(1200px 700px at 15% -10%, #ff8a2b33, transparent 60%),
+      radial-gradient(900px 600px at 100% 0%, #e05e0022, transparent 55%),
       linear-gradient(180deg, var(--bg-0), var(--bg-1) 40%, var(--bg-2));
     background-attachment:fixed;
     color:var(--ink);
@@ -65,7 +65,7 @@
     border-radius:16px;
     background:linear-gradient(155deg, var(--accent-2), #35156b);
     display:flex;align-items:center;justify-content:center;
-    box-shadow:0 8px 24px -8px #6c3ce090, inset 0 0 0 1px #ffffff22;
+    box-shadow:0 8px 24px -8px #e05e0090, inset 0 0 0 1px #ffffff22;
   }
   .capi svg{width:34px;height:34px;stroke:#f1ecfb;}
   h1{
@@ -95,7 +95,7 @@
   button.install{
     background:linear-gradient(150deg, var(--accent), var(--accent-2));
     border:none;color:#fff;font-weight:700;
-    box-shadow:0 8px 20px -8px #8b5cf6a0;
+    box-shadow:0 8px 20px -8px #ff8a2ba0;
   }
   button.install:hover{filter:brightness(1.08);}
 
@@ -125,7 +125,7 @@
     color:var(--ink-faint);
     margin-top:6px;
   }
-  .stat.hero{background:linear-gradient(155deg, var(--accent-2), #4a1f96); border-color:#8b5cf680;}
+  .stat.hero{background:linear-gradient(155deg, var(--accent-2), #7a2e00); border-color:#ff8a2b80;}
   .stat.hero .num{color:#fff;}
   .stat.hero .lbl{color:#e4d9ffcc;}
 
@@ -223,7 +223,7 @@
     background:linear-gradient(150deg, var(--accent), var(--accent-2));
     border:none;color:#fff;font-weight:700;font-size:13px;
     border-radius:10px;padding:10px 20px;cursor:pointer;
-    box-shadow:0 8px 20px -8px #8b5cf6a0;
+    box-shadow:0 8px 20px -8px #ff8a2ba0;
   }
   .addrow button:hover{filter:brightness(1.08);}
 
@@ -307,18 +307,18 @@
 
   @media (prefers-color-scheme: light){
     :root:not([data-theme="dark"]){
-      --bg-0:#f3eefc; --bg-1:#ece2fb; --bg-2:#e2d3f9;
-      --panel:#ffffff; --panel-2:#f7f2ff;
-      --line:#ddc9f7; --ink:#2c1852; --ink-dim:#6b5590; --ink-faint:#9683b8;
-      --accent:#7c3aed; --accent-2:#5b21b6;
-      --empty:#ece3fa;
+      --bg-0:#fbf7f3; --bg-1:#f3e9dd; --bg-2:#ecdcc6;
+      --panel:#ffffff; --panel-2:#faf3ea;
+      --line:#e6cfae; --ink:#241a10; --ink-dim:#6b4f33; --ink-faint:#9c7c58;
+      --accent:#e05e00; --accent-2:#b84800;
+      --empty:#f1e2cd;
     }
   }
   :root[data-theme="dark"]{
-    --bg-0:#0c0616; --bg-1:#180a2e; --bg-2:#241040;
-    --panel:#1c0e34; --panel-2:#150a28; --line:#3a2160;
-    --ink:#f1ecfb; --ink-dim:#b3a3d6; --ink-faint:#7a6aa0;
-    --accent:#a970ff; --accent-2:#6c3ce0; --empty:#2a1850;
+    --bg-0:#050505; --bg-1:#0e0e0e; --bg-2:#161616;
+    --panel:#131313; --panel-2:#0a0a0a; --line:#332a20;
+    --ink:#f5efe8; --ink-dim:#c9b8a4; --ink-faint:#8a7a68;
+    --accent:#ff8a2b; --accent-2:#e05e00; --empty:#1e1a15;
   }
 </style>
 </head>
@@ -335,7 +335,7 @@
       </svg>
     </div>
     <div>
-      <h1>my<em>habits</em></h1>
+      <h1><em>cyclus</em></h1>
       <div class="sub">Marque todos os dias. Seja sincero consigo mesmo, tutti frutto(a).</div>
     </div>
     <div class="toprow">
@@ -427,7 +427,7 @@ try{ enableIndexedDbPersistence(db); }catch(e){}
   ];
 
   var STORE_KEY = "capivara-habit-tracker-v1";
-  var CODE_KEY = "myhabits-sync-code";
+  var CODE_KEY = "cyclus-sync-code";
 
   function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
   function monthKey(y,m){ return y+"-"+String(m+1).padStart(2,"0"); }
